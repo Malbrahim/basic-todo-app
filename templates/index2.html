@@ -1,35 +1,85 @@
 <html>
-  <head>
-    <title>Todo App</title>
-    <style>
-      #error {
-        display: none;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="error" class="hidden">Something went wrong!</div>
+
+<head>
+  <title>Todo App</title>
+  <style>
+    #error {
+      display: none;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      width: 400px;
+    }
+
+    li {
+      clear: both;
+    }
+
+    .lists-wrapper,
+    .todos-wrapper {
+      display: inline-block;
+      vertical-align: top;
+      width: 49%;
+    }
+
+    li button {
+      -webkit-appearance: none;
+      border: none;
+      outline: none;
+      color: red;
+      float: right;
+      cursor: pointer;
+      font-size: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="error" class="hidden">Something went wrong!</div>
+  <div class="lists-wrapper">
+    <ul id="lists">
+      {% for list in lists %}
+      <li>
+        <a href="/list/{{ list.id }}">
+          {{ list.name }}
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="todos-wrapper">
+    <h4> {{ active_list.name }} </h4>
     <form id="form" method="post" action="/todos/create">
       <input type="text" id="description" name="description" />
       <input type="submit" value="Create" />
     </form>
     <ul id="todos">
-      {% for d in data %}
-      <li>{{ d.description }}</li>
+      {% for todo in todos %}
+      <li>
+        <input class="check-completed" data-id="{{ todo.id }}" type="checkbox" {% if todo.completed %} checked {% endif %} />
+        {{ todo.description }}
+        <button class="delete-button"  data-id="{{ todo.id }}">&cross;</button>
+      </li>
       {% endfor %}
     </ul>
-    <script>
-      document.getElementById('form').onsubmit = function(e) {
-        e.preventDefault();
-        fetch('http://127.0.0.1:5000/todos/create', {
-          method: 'POST',
-          body: JSON.stringify({
-            'description': document.getElementById('description').value,
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        })
+  </div>
+  <script>
+    document.getElementById('form').onsubmit = function (e) {
+      e.preventDefault();
+      fetch('/todos/create', {
+        method: 'POST',
+        body: JSON.stringify({
+          'list_id': {{ active_list.id }},
+          'description': document.getElementById('description').value,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
         .then(response => response.json())
         .then(jsonResponse => {
           console.log('response', jsonResponse);
@@ -38,10 +88,46 @@
           document.getElementById('todos').appendChild(li);
           document.getElementById('error').className = 'hidden';
         })
-        .catch(function() {
+        .catch(function () {
           document.getElementById('error').className = '';
         })
+    }
+    const checkboxes = document.querySelectorAll('.check-completed');
+    for (let i = 0; i < checkboxes.length; i++) {
+      const checkbox = checkboxes[i];
+      checkbox.onchange = function (e) {
+        const newCompleted = e.target.checked;
+        const todoId = e.target.dataset['id'];
+        fetch('/todos/' + todoId + '/set-completed', {
+          method: 'POST',
+          body: JSON.stringify({
+            'completed': newCompleted
+          }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+          .then(function () {
+            document.getElementById('error').className = 'hidden';
+          })
+          .catch(function () {
+            document.getElementById('error').className = '';
+          })
       }
-    </script>
-  </body>
+    }
+
+    const deleteBtns = document.querySelectorAll('.delete-button');
+    for (let i = 0; i < deleteBtns.length; i++) {
+      const btn = deleteBtns[i];
+      btn.onclick = function (e) {
+        const todo_Id = e.target.dataset['id'];
+        fetch('/todos/' + todo_Id, {
+          method: 'DELETE'
+        });
+      }
+    }
+
+  </script>
+</body>
+
 </html>
