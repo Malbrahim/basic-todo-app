@@ -1,13 +1,11 @@
-# How to Setup a New Flask App on a Mac
-
-#### MVC stands for Model-View-Controller
+### MVC stands for Model-View-Controller
 Layers
 - Models: manage data and business logic for us. What happens inside models and database, capturing logical relationships and properties across the web app objects
 - Views: handles display and representation logic. What the user sees (HTML, CSS, JS from the user's perspective)
 - Controllers: routes commands to the models and views, containing control logic. Control how commands are sent to models and views, and how models and views wound up interacting with each other.
 
 
-#### There are 3 methods of getting user data from a view to a controller. See the image below.
+### There are 3 methods of getting user data from a view to a controller. See the image below.
 - URL query parameters: /hello?field1=value1 
 ``` 
 value1 = request.args.get('field1')
@@ -27,7 +25,7 @@ data_dictionary = json.load(data_string)
 request.get_json()['name']
 ``` 
 
-#### For each CRUD operation, there are corresponding SQL command
+### For each CRUD operation, there are corresponding SQL command
 
 **1. CREATE**
 
@@ -87,7 +85,7 @@ db.session.commit()
 ```
 
 
-#### Modeling of relationship
+### Modeling of relationship
 **1- one-to-one**
 ```
 children = db.relationship('ChildModel', backref='some_parent', lazy=True)
